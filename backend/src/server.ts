@@ -1,10 +1,30 @@
-import http from "http";
+import Fastify from "fastify";
+import cors from "@fastify/cors";
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Hello TypeScript!");
+const fastify = Fastify();
+
+await fastify.register(cors);
+
+fastify.get("/", (request, reply) => {
+  reply.send({ hello: "world" });
 });
 
-server.listen(3000, () => {
-  console.log("Servidor rodando na porta 3000");
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+fastify.post<{ Body: LoginBody }>("/auth/signin", (request, reply) => {
+  const { email, password } = request.body;
+
+  console.log(email, password);
+
+  reply.send({ success: true });
 });
+
+try {
+  await fastify.listen({ port: 3000, host: "0.0.0.0" });
+} catch (err) {
+  fastify.log.error(err);
+  process.exit(1);
+}
