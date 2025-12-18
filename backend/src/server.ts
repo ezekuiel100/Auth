@@ -11,18 +11,36 @@ fastify.get("/", (request, reply) => {
   reply.send({ hello: "world" });
 });
 
-const loginSchema = Type.Object({
+const signinSchema = Type.Object({
   email: Type.String({ format: "email" }),
   password: Type.String({ minLength: 8, maxLength: 30 }),
 });
 
 fastify.post(
   "/auth/signin",
-  { schema: { body: loginSchema } },
+  { schema: { body: signinSchema } },
   (request, reply) => {
     const { email, password } = request.body;
 
     console.log(email, password);
+
+    reply.send({ success: true });
+  }
+);
+
+const signupSchema = Type.Object({
+  name: Type.String({ minLength: 2, maxLength: 30 }),
+  email: Type.String({ format: "email" }),
+  password: Type.String({ minLength: 8, maxLength: 30 }),
+});
+
+fastify.post(
+  "/auth/signup",
+  { schema: { body: signupSchema } },
+  (request, reply) => {
+    const { name, email, password } = request.body;
+
+    console.log(name, email, password);
 
     reply.send({ success: true });
   }
