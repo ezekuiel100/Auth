@@ -4,7 +4,17 @@ import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { Type } from "@sinclair/typebox";
 import { db } from "./database/index.js";
 
-const fastify = Fastify().withTypeProvider<TypeBoxTypeProvider>();
+const fastify = Fastify({
+  logger: {
+    transport: {
+      target: "pino-pretty",
+      options: {
+        translateTime: "HH:MM:ss Z",
+        ignore: "pid,hostname",
+      },
+    },
+  },
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 await fastify.register(cors);
 
@@ -21,18 +31,27 @@ fastify.post(
   "/auth/signin",
   { schema: { body: signinSchema } },
   (request, reply) => {
-    const { email, password } = request.body;
+    try {
+      const { email, password } = request.body;
 
-    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+      const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
 
-    if (user?.password != password)
-      return reply
-        .status(401)
-        .send({ success: false, message: "Credenciais erradas!" });
+      if (user?.password != password)
+        return reply
+          .status(401)
+          .send({ success: false, message: "Credenciais erradas!" });
 
-    const { password: _, ...userWithoutPassord } = user;
+      const { password: _, ...userWithoutPassord } = user;
 
-    reply.send({ success: true, user: userWithoutPassord });
+      reply.send({ success: true, user: userWithoutPassord });
+    } catch (error) {
+      fastify.log.error({ error, email: request.body.email });
+
+      reply.code(500).send({
+        success: false,
+        message: "Erro interno no servidor.",
+      });
+    }
   }
 );
 
