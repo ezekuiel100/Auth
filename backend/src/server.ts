@@ -23,13 +23,16 @@ fastify.post(
   (request, reply) => {
     const { email, password } = request.body;
 
-    const user = db
-      .prepare("SELECT name, email FROM users WHERE email = ?")
-      .get(email);
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
 
-    console.log(user);
+    if (user?.password != password)
+      return reply
+        .status(401)
+        .send({ success: false, message: "Credenciais erradas!" });
 
-    reply.send({ success: true, user });
+    const { password: _, ...userWithoutPassord } = user;
+
+    reply.send({ success: true, user: userWithoutPassord });
   }
 );
 
