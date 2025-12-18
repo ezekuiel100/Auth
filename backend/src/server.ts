@@ -23,9 +23,13 @@ fastify.post(
   (request, reply) => {
     const { email, password } = request.body;
 
-    console.log(email, password);
+    const user = db
+      .prepare("SELECT name, email FROM users WHERE email = ?")
+      .get(email);
 
-    reply.send({ success: true });
+    console.log(user);
+
+    reply.send({ success: true, user });
   }
 );
 
