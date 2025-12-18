@@ -1,8 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { type Static, Type } from "@sinclair/typebox";
+import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { Type } from "@sinclair/typebox";
 
-const fastify = Fastify();
+const fastify = Fastify().withTypeProvider<TypeBoxTypeProvider>();
 
 await fastify.register(cors);
 
@@ -15,9 +16,7 @@ const loginSchema = Type.Object({
   password: Type.String({ minLength: 8, maxLength: 30 }),
 });
 
-type LoginType = Static<typeof loginSchema>;
-
-fastify.post<{ Body: LoginType }>(
+fastify.post(
   "/auth/signin",
   { schema: { body: loginSchema } },
   (request, reply) => {
