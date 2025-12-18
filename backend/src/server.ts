@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { Type } from "@sinclair/typebox";
+import { db } from "./database/index.js";
 
 const fastify = Fastify().withTypeProvider<TypeBoxTypeProvider>();
 
@@ -40,7 +41,12 @@ fastify.post(
   (request, reply) => {
     const { name, email, password } = request.body;
 
-    console.log(name, email, password);
+    const insertUser = db.prepare(`
+      INSERT INTO users (name, email, password)
+      VALUES (?,?,?)
+    `);
+
+    insertUser.run(name, email, password);
 
     reply.send({ success: true });
   }
