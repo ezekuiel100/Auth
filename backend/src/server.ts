@@ -3,6 +3,14 @@ import cors from "@fastify/cors";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { Type } from "@sinclair/typebox";
 import { db } from "./database/index.js";
+import fastifyCookie from "@fastify/cookie";
+import jwt from "jsonwebtoken";
+
+const secret = process.env.JWT_SECRET_KEY;
+
+if (!secret) {
+  throw new Error("A variável de ambiente JWT_SECRET_KEY não foi definida!");
+}
 
 const fastify = Fastify({
   logger: {
@@ -16,7 +24,8 @@ const fastify = Fastify({
   },
 }).withTypeProvider<TypeBoxTypeProvider>();
 
-await fastify.register(cors);
+fastify.register(cors, { origin: "http://localhost:5173", credentials: true });
+fastify.register(fastifyCookie, { secret });
 
 fastify.get("/", (request, reply) => {
   reply.send({ hello: "world" });
@@ -36,14 +45,28 @@ fastify.post(
 
       const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
 
-      if (user?.password != password)
-        return reply
+      if (user?.password != password) {
+        reply
           .status(401)
           .send({ success: false, message: "Credenciais erradas!" });
+        return;
+      }
 
-      const { password: _, ...userWithoutPassord } = user;
+      const token = jwt.sign({ id: user.id, email }, secret, {
+        expiresIn: "1h",
+      });
 
-      reply.send({ success: true, user: userWithoutPassord });
+      const { password: _, ...userWithoutPassword } = user;
+
+      reply
+        .setCookie("token", token, {
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 3600, // 1 hora em segundos
+        })
+        .send({ success: true, user: userWithoutPassword });
     } catch (error) {
       fastify.log.error({ error, email: request.body.email });
 
