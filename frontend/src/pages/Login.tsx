@@ -10,7 +10,9 @@ export default function Login() {
   const { setUser } = useUser();
   const navigate = useNavigate();
 
-  async function handleSignIng() {
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault();
+
     try {
       const res = await fetch("http://localhost:3000/auth/signin", {
         method: "POST",
@@ -39,7 +41,7 @@ export default function Login() {
   }
 
   return (
-    <form className="login">
+    <form className="login" onSubmit={handleSignIn}>
       <h1>Faça login</h1>
       <input
         type="text"
@@ -53,9 +55,7 @@ export default function Login() {
         onChange={(e) => setForm({ ...form, password: e.target.value })}
         placeholder="Senha"
       />
-      <button type="submit" onClick={handleSignIng}>
-        Entrar
-      </button>
+      <button type="submit">Entrar</button>
 
       <a href="#">Criar conta</a>
     </form>
