@@ -5,6 +5,7 @@ import { Type } from "@sinclair/typebox";
 import { db } from "./database/index.js";
 import fastifyCookie from "@fastify/cookie";
 import jwt from "jsonwebtoken";
+import { request } from "node:http";
 
 const secret = process.env.JWT_SECRET_KEY;
 
@@ -100,6 +101,18 @@ fastify.post(
     reply.send({ success: true });
   }
 );
+
+fastify.post("/auth/signout", (_, reply) => {
+  reply
+    .clearCookie("token", {
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    })
+    .status(200)
+    .send({ success: true, message: "Signout realizado com sucesso" });
+});
 
 try {
   await fastify.listen({ port: 3000, host: "0.0.0.0" });
