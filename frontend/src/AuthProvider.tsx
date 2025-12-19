@@ -9,6 +9,7 @@ interface UserCcntextType {
   user: User | null;
   signIn: (data: User) => void;
   signOut: () => void;
+  updateUser: (newData: Partial<User>) => void;
 }
 
 const UserContext = createContext<UserCcntextType | undefined>(undefined);
@@ -29,8 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user_data");
   }
 
+  function updateUser(newData: Partial<User>) {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updated = { ...prevUser, ...newData };
+
+      localStorage.setItem("user_data", JSON.stringify(updated));
+
+      return updated;
+    });
+  }
+
   return (
-    <UserContext.Provider value={{ user, signIn, signOut }}>
+    <UserContext.Provider value={{ user, signIn, signOut, updateUser }}>
       {children}
     </UserContext.Provider>
   );
