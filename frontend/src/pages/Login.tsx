@@ -7,7 +7,7 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const { setUser } = useUser();
+  const { signIn } = useUser();
   const navigate = useNavigate();
 
   async function handleSignIn(e: React.FormEvent) {
@@ -29,7 +29,7 @@ export default function Login() {
       }
 
       const data = await res.json();
-      setUser(data.user);
+      signIn(data.user);
       navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
