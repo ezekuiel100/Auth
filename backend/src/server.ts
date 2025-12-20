@@ -2,12 +2,8 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import fastifyCookie from "@fastify/cookie";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import signinController from "./controllers/signinController.js";
 import middleware from "./middleware.js";
-import signupController from "./controllers/signupController.js";
-import updateUserController from "./controllers/updateUserController.js";
-import signoutController from "./controllers/signoutController.js";
-import { signinSchema, signupSchema, updateSchema } from "./schemas/index.js";
+import routes from "./routes/index.js";
 
 const secret = process.env.JWT_SECRET_KEY;
 
@@ -36,29 +32,7 @@ fastify.register(fastifyCookie, { secret });
 
 middleware(fastify);
 
-fastify.get("/", { config: { public: true } }, (request, reply) => {
-  reply.send({ hello: "world" });
-});
-
-fastify.post("/auth/signin", {
-  schema: { body: signinSchema },
-  config: { public: true },
-  handler: signinController,
-});
-
-fastify.post("/auth/signup", {
-  schema: { body: signupSchema },
-  config: { public: true },
-  handler: signupController,
-});
-
-fastify.post("/auth/signout", signoutController);
-
-fastify.put(
-  "/user/update",
-  { schema: { body: updateSchema } },
-  updateUserController
-);
+fastify.register(routes);
 
 try {
   await fastify.listen({ port: 3000, host: "0.0.0.0" });
