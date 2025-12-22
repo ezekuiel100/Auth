@@ -7,11 +7,17 @@ export default function Login() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const { signIn } = useUser();
+
   const navigate = useNavigate();
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     try {
       const res = await fetch("http://localhost:3000/auth/signin", {
@@ -23,12 +29,21 @@ export default function Login() {
         body: JSON.stringify(form),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        console.log("Erro no login");
+        if (res.status === 401) {
+          setError(data.message || "E-mail ou senha inválidos.");
+        } else if (res.status === 500) {
+          setError(
+            "O sistema está temporariamente fora do ar. Tente mais tarde."
+          );
+        } else {
+          setError("Algo deu errado. Verifique os dados e tente novamente.");
+        }
         return;
       }
 
-      const data = await res.json();
       signIn(data.user);
       navigate("/");
     } catch (err: unknown) {
@@ -37,6 +52,8 @@ export default function Login() {
       } else {
         console.log("Ocorreu um erro desconhecido", err);
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -44,18 +61,26 @@ export default function Login() {
     <form className="login" onSubmit={handleSignIn}>
       <h1>Faça login</h1>
       <input
-        type="text"
+        type="email"
+        required
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
         placeholder="Email"
       />
       <input
         type="password"
+        required
+        minLength={8}
+        maxLength={30}
         value={form.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
         placeholder="Senha"
       />
-      <button type="submit">Entrar</button>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? "Carregando..." : "Entrar"}
+      </button>
+
+      {error?.length > 0 && <div className="error">{error}</div>}
 
       <a href="#">Criar conta</a>
     </form>
