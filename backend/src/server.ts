@@ -4,6 +4,7 @@ import fastifyCookie from "@fastify/cookie";
 import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import middleware from "./middleware.js";
 import routes from "./routes/index.js";
+import rateLimit from "@fastify/rate-limit";
 
 const secret = process.env.JWT_SECRET_KEY;
 
@@ -22,6 +23,8 @@ const fastify = Fastify({
     },
   },
 }).withTypeProvider<TypeBoxTypeProvider>();
+
+await fastify.register(rateLimit, { global: true, max: 5, timeWindow: 1000 });
 
 fastify.register(cors, {
   origin: "http://localhost:5173",
