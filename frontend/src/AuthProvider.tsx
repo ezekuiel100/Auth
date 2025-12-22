@@ -5,19 +5,25 @@ interface User {
   email: string;
 }
 
-interface UserCcntextType {
+interface UserContextType {
   user: User | null;
   signIn: (data: User) => void;
   signOut: () => void;
-  updateUser: (newData: Partial<User>) => void;
+  updateUser: (newData: User) => void;
 }
 
-const UserContext = createContext<UserCcntextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem("user_data");
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const saved = localStorage.getItem("user_data");
+      if (!saved) return null;
+
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
   });
 
   function signIn(data: User) {
@@ -30,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user_data");
   }
 
-  function updateUser(newData: Partial<User>) {
+  function updateUser(newData: User) {
     setUser((prevUser) => {
       if (!prevUser) return null;
       const updated = { ...prevUser, ...newData };
