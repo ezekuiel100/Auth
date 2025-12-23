@@ -14,9 +14,11 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    login_attempts INTEGER DEFAULT 0,
+    lock_until TEXT
   )
 `);
 
-
 console.log("Banco pronto");
+
