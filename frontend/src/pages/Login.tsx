@@ -39,7 +39,10 @@ export default function Login() {
             "O sistema está temporariamente fora do ar. Tente mais tarde."
           );
         } else {
-          setError("Algo deu errado. Verifique os dados e tente novamente.");
+          setError(
+            data.message ||
+              "Algo deu errado. Verifique os dados e tente novamente."
+          );
         }
         return;
       }
