@@ -4,10 +4,17 @@ import signoutController from "../controllers/signoutController.js";
 import signupController from "../controllers/signupController.js";
 import updateUserController from "../controllers/updateUserController.js";
 import { signinSchema, signupSchema, updateSchema } from "../schemas/index.js";
+import { db } from "../database/index.js";
 
 export default function routes(fastify: FastifyInstance) {
-  fastify.get("/", { config: { public: true } }, (request, reply) => {
-    reply.send({ hello: "world" });
+  fastify.get("/auth/me", (request, reply) => {
+    const user = request.user;
+
+    const userData = db
+      .prepare("SELECT name, email FROM users WHERE id = ?")
+      .get(user.id);
+
+    reply.send(userData);
   });
 
   fastify.post("/auth/signin", {
