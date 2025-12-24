@@ -9,6 +9,8 @@ export const db = new Database(
   path.resolve(__dirname, ".", "database.db")
 );
 
+db.pragma('journal_mode = WAL');
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
