@@ -5,7 +5,6 @@ import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import middleware from "./middleware.js";
 import routes from "./routes/index.js";
 import rateLimit from "@fastify/rate-limit";
-import incrementFailedLoginAttempts from "./repositories/incrementFailedLoginAttempts.js";
 
 const secret = process.env.JWT_SECRET_KEY;
 

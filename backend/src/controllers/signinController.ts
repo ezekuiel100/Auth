@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { signinSchema } from "../schemas/index.js";
 import type { Static } from "@fastify/type-provider-typebox";
 import incrementFailedLoginAttempts from "../repositories/incrementFailedLoginAttempts.js";
+import bcrypt from "bcrypt";
 
 const secret = process.env.JWT_SECRET_KEY as string;
 
@@ -38,7 +39,9 @@ export default async function signinController(
       });
     }
 
-    if (user.password != password) {
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
       const { login_attempts } = incrementFailedLoginAttempts(email);
 
       if (
