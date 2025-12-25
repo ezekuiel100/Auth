@@ -49,11 +49,11 @@ export default function Login() {
 
       signIn(data.user);
       navigate("/");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log("Erro de rede:", err.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log("Erro de rede:", error.message);
       } else {
-        console.log("Ocorreu um erro desconhecido", err);
+        console.log("Ocorreu um erro desconhecido", error);
       }
     } finally {
       setIsLoading(false);
