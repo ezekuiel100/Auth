@@ -1,0 +1,27 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 15
+      name: "Rampa de Stress (10 a 100 usuários/seg)"
+  plugins:
+    metrics-by-endpoint: {}
+
+scenarios:
+  - name: "Fluxo Crítico"
+    flow:
+      - post:
+          url: "/auth/signup"
+          json:
+            email: "stress_{{ $uuid }}@test.com"
+            password: "password123"
+            name: "Stress User"
+      - think: 1
+      - post:
+          url: "/auth/signin"
+          json:
+            email: "stress_{{ $uuid }}@test.com"
+            password: "password123"
+      - get:
+          url: "/auth/me"
