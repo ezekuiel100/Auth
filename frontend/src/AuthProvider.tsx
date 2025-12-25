@@ -21,16 +21,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem("user_data");
-      if (!saved) return null;
-
-      return JSON.parse(saved);
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -40,6 +31,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("http://localhost:3000/auth/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          localStorage.removeItem("user_data");
+          setUser(null);
+          return;
+        }
+
+        setUser(data);
+        return;
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.log(error.message);
+        }
+      }
+    }
+    fetchUser();
   }, []);
 
   function signIn(data: User) {
