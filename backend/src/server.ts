@@ -52,14 +52,21 @@ fastify.setErrorHandler((error: FastifyError, request, reply) => {
     return reply.status(401).send({ message: error.message });
   }
 
-  request.log.error(`Erro: ${cleanMessage} \n Local: ${originLine?.trim()}`);
+  if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    request.log.warn(`Conflito de dados: ${cleanMessage}`);
+    return reply.status(409).send({ error: "E-mail já existe" });
+  }
 
   if (error.validation) {
+    request.log.warn(`[VALIDACAO] ${cleanMessage}`);
+
     return reply.status(400).send({
       message: "Dados de entrada inválidos",
       errors: error.validation,
     });
   }
+
+  request.log.error(`Erro: ${cleanMessage} \n Local: ${originLine?.trim()}`);
 
   if ((error as any).code?.startsWith("SQLITE")) {
     return reply.status(500).send({
