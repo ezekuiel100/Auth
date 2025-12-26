@@ -21,16 +21,7 @@ export default async function signupController(
 
   const hash = await bcrypt.hash(password, saltRounds);
 
-  try {
-    insertUser.run(name, email, hash);
+  insertUser.run(name, email, hash);
 
-    reply.send({ success: true });
-  } catch (error: any) {
-    if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
-      return reply.status(409).send({ error: "E-mail já existe" });
-    }
-
-    request.log.error(error);
-    return reply.status(500).send({ error: "Erro no banco" });
-  }
+  reply.send({ success: true });
 }
