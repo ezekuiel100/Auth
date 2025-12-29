@@ -93,10 +93,7 @@ describe("POST /auth/signin", () => {
         );
 
         const setCookie = res.headers.get("set-cookie");
-        assert.strictEqual(
-            setCookie,
-            null,
-            "Should not send a cookie on failed login"
+        assert.ok(!setCookie, "Should not send a cookie on failed login"
         );
 
         const data = await res.json();
@@ -104,3 +101,6 @@ describe("POST /auth/signin", () => {
         assert.deepStrictEqual(data, { message: "Credenciais inválidas" });
     });
 });
+
+
+//sem email, sem senha, sql injection
