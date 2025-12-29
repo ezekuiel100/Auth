@@ -100,7 +100,20 @@ describe("POST /auth/signin", () => {
 
         assert.deepStrictEqual(data, { message: "Credenciais inválidas" });
     });
+
+    it("should not be vulnerable to SQL injection in the email field", async () => {
+        const res = await fetch(`${BASE_URL}/auth/signin`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: "admin'--@email.com",
+                password: "any_password"
+            })
+        });
+
+        assert.notStrictEqual(res.status, 200, "SQL Injection should not return 200 OK");
+        assert.ok(res.status >= 400, "Should return an error status for malicious input");
+    })
 });
 
 
-//sem email, sem senha, sql injection
