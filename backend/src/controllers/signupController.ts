@@ -23,5 +23,5 @@ export default async function signupController(
 
   insertUser.run(name, email, hash);
 
-  reply.send({ success: true });
+  reply.status(201).send({ success: true });
 }
