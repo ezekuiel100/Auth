@@ -13,7 +13,7 @@ if (!secret) {
   throw new Error("A variável de ambiente JWT_SECRET_KEY não foi definida!");
 }
 
-const fastify = Fastify({
+export const fastify = Fastify({
   logger: {
     transport: {
       target: "pino-pretty",
@@ -89,9 +89,11 @@ middleware(fastify);
 
 fastify.register(routes);
 
-try {
-  await fastify.listen({ port: 3000, host: "0.0.0.0" });
-} catch (err) {
-  fastify.log.error(err);
-  process.exit(1);
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  try {
+    await fastify.listen({ port: 3000, host: "0.0.0.0" });
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
 }
