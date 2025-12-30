@@ -1,6 +1,6 @@
 import { after, describe, it } from "node:test";
 import assert from "node:assert";
-import { db } from "../database/index.js";
+import { db } from "../src/database/index.js";
 
 const BASE_URL = "http://localhost:3000";
 
