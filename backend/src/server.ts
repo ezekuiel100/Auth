@@ -6,6 +6,7 @@ import middleware from "./middleware.js";
 import routes from "./routes/index.js";
 import rateLimit from "@fastify/rate-limit";
 import { AuthError } from "./error.js";
+import { fileURLToPath } from "node:url";
 
 const secret = process.env.JWT_SECRET_KEY;
 
@@ -89,7 +90,7 @@ middleware(fastify);
 
 fastify.register(routes);
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     await fastify.listen({ port: 3000, host: "0.0.0.0" });
   } catch (err) {
