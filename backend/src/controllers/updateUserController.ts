@@ -21,5 +21,5 @@ export default function updateUserController(
     return reply.status(404).send({ error: "Usuário não encontrado" });
   }
 
-  reply.send({ success: true, message: "Dados atualizados com sucesso" });
+  reply.send({ message: "Dados atualizados com sucesso" });
 }
