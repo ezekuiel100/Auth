@@ -1,19 +1,14 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { db } from "../database/index.js";
 import type { signupSchema } from "../schemas/index.js";
 import type { Static } from "@fastify/type-provider-typebox";
 import bcrypt from "bcrypt";
-
-const insertUser = db.prepare(`
-      INSERT INTO users (name, email, password)
-      VALUES (?,?,?)
-    `);
+import signUp from "../repositories/signUp.js";
 
 const saltRounds = 10;
 
 type SignupBody = Static<typeof signupSchema>;
 
-export default async function signupController(
+export default async function signUpController(
   request: FastifyRequest<{ Body: SignupBody }>,
   reply: FastifyReply
 ) {
@@ -21,7 +16,7 @@ export default async function signupController(
 
   const hash = await bcrypt.hash(password, saltRounds);
 
-  insertUser.run(name, email, hash);
+  await signUp(name, email, hash);
 
   reply.status(201).send({ success: true });
 }

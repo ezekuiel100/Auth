@@ -29,7 +29,7 @@
   },
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
-    "test": "node --import tsx --test src/**/*.test.ts",
+    "test": "node --import tsx --env-file=.env --test test/*.test.ts",
     "stress": "artillery run -o src/performance/res.json  src/performance/load-test.yml"
   },
   "keywords": [],
