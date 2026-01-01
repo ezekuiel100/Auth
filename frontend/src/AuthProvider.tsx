@@ -21,7 +21,10 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const userData = localStorage.getItem("user_data");
+    return userData ? JSON.parse(userData) : null;
+  });
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
