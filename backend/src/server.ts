@@ -8,10 +8,10 @@ import rateLimit from "@fastify/rate-limit";
 import { AuthError } from "./error.js";
 import { fileURLToPath } from "node:url";
 
-const secret = process.env.JWT_SECRET_KEY;
+const COOKIE_SECRET = process.env.COOKIE_SECRET;
 
-if (!secret) {
-  throw new Error("A variável de ambiente JWT_SECRET_KEY não foi definida!");
+if (!COOKIE_SECRET) {
+  throw new Error("A variável de ambiente COOKIE_SECRET não foi definida!");
 }
 
 export const fastify = Fastify({
@@ -34,7 +34,7 @@ fastify.register(cors, {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 });
-fastify.register(fastifyCookie, { secret });
+fastify.register(fastifyCookie, { secret: COOKIE_SECRET });
 
 fastify.setErrorHandler((error: FastifyError, request, reply) => {
   const shortStack = error.stack?.split("\n") || [];
