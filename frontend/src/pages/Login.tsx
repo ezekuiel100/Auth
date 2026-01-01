@@ -30,6 +30,7 @@ export default function Login() {
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!res.ok) {
         if (res.status === 401) {
@@ -47,7 +48,7 @@ export default function Login() {
         return;
       }
 
-      signIn(data.user);
+      signIn(data);
       navigate("/");
     } catch (error: unknown) {
       if (error instanceof Error) {
