@@ -5,7 +5,13 @@ export default function signoutController(
   reply: FastifyReply
 ) {
   reply
-    .clearCookie("token", {
+    .clearCookie("accessToken", {
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    })
+    .clearCookie("refreshToken", {
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV === "production",
