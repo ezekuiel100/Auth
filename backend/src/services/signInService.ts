@@ -6,18 +6,19 @@ import resetLoginAttempts from "../repositories/resetLoginAttempts.js";
 import setUserLockUntil from "../repositories/setUserLockUntil.js";
 import { AuthError } from "../error.js";
 
-const secret = process.env.JWT_SECRET_KEY as string;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET as string;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string;
 
-if (!secret) {
-  throw new Error("A variável de ambiente JWT_SECRET_KEY não foi definida!");
+if (!ACCESS_SECRET || !REFRESH_SECRET) {
+  throw new Error("A variável de ambiente SECRET_KEY não foi definida!");
 }
-
 interface SignInResult {
   user: {
     name: string;
     email: string;
   };
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 export default async function signInService(
   email: string,
@@ -49,7 +50,11 @@ export default async function signInService(
 
   await resetLoginAttempts(email);
 
-  const token = jwt.sign({ id: user.id, email }, secret, {
+  const accessToken = jwt.sign({ id: user.id, email }, ACCESS_SECRET, {
+    expiresIn: "15m",
+  });
+
+  const refreshToken = jwt.sign({ id: user.id, email }, REFRESH_SECRET, {
     expiresIn: "1h",
   });
 
@@ -61,5 +66,5 @@ export default async function signInService(
     ...userWithoutPassword
   } = user;
 
-  return { user: userWithoutPassword, token };
+  return { user: userWithoutPassword, accessToken, refreshToken };
 }

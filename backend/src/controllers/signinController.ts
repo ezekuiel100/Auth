@@ -11,10 +11,20 @@ export default async function signInController(
 ) {
   const { email, password } = request.body;
 
-  const { user, token } = await signInService(email, password);
+  const { user, accessToken, refreshToken } = await signInService(
+    email,
+    password
+  );
 
   reply
-    .setCookie("token", token, {
+    .setCookie("accessToken", accessToken, {
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 3600,
+    })
+    .setCookie("refreshToken", refreshToken, {
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV === "production",
