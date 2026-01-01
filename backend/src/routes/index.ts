@@ -4,7 +4,7 @@ import signoutController from "../controllers/signoutController.js";
 import updateUserController from "../controllers/updateUserController.js";
 import { signinSchema, signupSchema, updateSchema } from "../schemas/index.js";
 import { db } from "../database/index.js";
-import signUpController from "../controllers/signupController.js";
+import signUpController from "../controllers/signUpController.js";
 
 export default function routes(fastify: FastifyInstance) {
   fastify.get("/auth/me", (request, reply) => {
