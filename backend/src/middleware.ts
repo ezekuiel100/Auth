@@ -12,13 +12,14 @@ declare module "fastify" {
   }
 }
 
-const secret = process.env.JWT_SECRET_KEY as string;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET as string;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string;
 
-if (!secret) {
-  throw new Error("A variável de ambiente JWT_SECRET_KEY não foi definida!");
+if (!ACCESS_SECRET || !REFRESH_SECRET) {
+  throw new Error("A variável de ambiente SECRET_KEY não foi definida!");
 }
 
-export default function middleware(fastify: FastifyInstance) {
+export default async function middleware(fastify: FastifyInstance) {
   fastify.addHook("preHandler", (request, reply, done) => {
     const isPublic = request.routeOptions.config?.public;
 
@@ -26,18 +27,48 @@ export default function middleware(fastify: FastifyInstance) {
       return done();
     }
 
-    const { token } = request.cookies;
+    const { accessToken, refreshToken } = request.cookies;
 
-    if (!token) {
-      reply.code(401).send({ error: "Token missing" });
-      return;
+    if (!accessToken && !refreshToken) {
+      return reply.code(401).send({ error: "Tokens missing" });
     }
 
     try {
-      const decode = jwt.verify(token, secret);
+      const decode = jwt.verify(accessToken ?? "", ACCESS_SECRET);
+
       request.user = decode;
       done();
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === "TokenExpiredError" && refreshToken) {
+        try {
+          const refreshDecoded = jwt.verify(refreshToken, REFRESH_SECRET) as {
+            id: number;
+            email: string;
+          };
+
+          const newAccessToken = jwt.sign(
+            { id: refreshDecoded.id },
+            ACCESS_SECRET,
+            {
+              expiresIn: "15m",
+            }
+          );
+
+          reply.setCookie("accessToken", newAccessToken, {
+            httpOnly: true,
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 3600,
+          });
+
+          request.user = refreshDecoded;
+          return done();
+        } catch (refreshErr) {
+          return reply.code(401).send({ error: "Session expired" });
+        }
+      }
+
       reply.code(401).send({ error: "Invalid token" });
     }
   });
